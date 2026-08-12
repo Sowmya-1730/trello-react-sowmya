@@ -93,3 +93,45 @@ export const updateListClosed = (listId, closed) => {
     },
   })
 }
+
+
+
+export const getListCards = (listId) => {
+  return trelloApi.get(`/lists/${listId}/cards`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN
+    },
+  })
+}
+
+export const createCard = (name, listId) => {
+  return trelloApi.post('/cards', null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+      idList: listId,
+    },
+  })
+}
+
+export const updateCard = (cardId, name) => {
+  return trelloApi.put(`/cards/${cardId}`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+export const updateCardClosed = (cardId, closed) => {
+  return trelloApi.put(`/cards/${cardId}/closed`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      value: closed,
+    },
+  })
+}
