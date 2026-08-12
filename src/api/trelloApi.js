@@ -32,12 +32,64 @@ export const createBoard = (name) => {
   })
 }
 
+export const updateBoard = (boardId, name) => {
+  return trelloApi.put(`/boards/${boardId}`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+export const deleteBoard = (boardId) => {
+  return trelloApi.delete(`/boards/${boardId}`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
+
 
 export const getBoardLists = (boardId) => {
   return trelloApi.get(`/boards/${boardId}/lists`, {
     params: {
       key: import.meta.env.VITE_TRELLO_API_KEY,
       token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
+
+
+export const createList = (name, boardId) => {
+  return trelloApi.post('/lists', null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+      idBoard: boardId,
+    },
+  })
+}
+
+
+export const updateList = (listId, name) => {
+  return trelloApi.put(`/lists/${listId}`,null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+export const updateListClosed = (listId, closed) => {
+  return trelloApi.put(`/lists/${listId}/closed`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      value: closed,
     },
   })
 }
