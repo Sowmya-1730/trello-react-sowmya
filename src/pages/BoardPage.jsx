@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import CreateListModal from '../components/CreateListModal'
 import ListCard from '../components/ListCard'
+import CardModal from '../components/CardModal'
 
 import {
   getBoard,
@@ -28,6 +29,9 @@ function BoardPage() {
 
   const [isEditingBoardName, setIsEditingBoardName] = useState(false)
   const [boardName, setBoardName] = useState('');
+
+  const [selectedCard, setSelectedCard] = useState(null)
+  const [selectedList, setSelectedList] = useState(null)
 
   const fetchBoard = async () => {
     try {
@@ -151,6 +155,13 @@ function BoardPage() {
       console.error('Error archiving card:', error)
     }
   }
+
+  const handleCardClick = (card, list) => {
+    setSelectedCard(card)
+    setSelectedList(list)
+  }
+
+
   return (
     <main className="flex h-screen flex-col bg-gray-100">
 
@@ -189,6 +200,7 @@ function BoardPage() {
               onRefreshCards={fetchCardsForList}
               onRenameCard={handleRenameCard}
               onArchiveCard={handleArchiveCard}
+              onCardClick={handleCardClick}
             />
           ))}
 
@@ -211,6 +223,17 @@ function BoardPage() {
         onCreate={handleCreateList}
         loading={creating}
       />
+
+      <CardModal
+        open={selectedCard !== null}
+        onCancel={() => {
+          setSelectedCard(null)
+          setSelectedList(null)
+        }}
+        card={selectedCard}
+        list={selectedList}
+      />
+
 
     </main>
   )
