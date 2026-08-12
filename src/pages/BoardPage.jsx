@@ -11,6 +11,9 @@ import {
   updateBoard,
   updateListClosed,
   updateList,
+  getListCards,
+  updateCard,
+  updateCardClosed
 } from '../api/trelloApi'
 
 function BoardPage() {
@@ -18,6 +21,7 @@ function BoardPage() {
 
   const [board, setBoard] = useState(null)
   const [lists, setLists] = useState([])
+  const [cards, setCards] = useState([])
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -39,6 +43,13 @@ function BoardPage() {
     try {
       const response = await getBoardLists(board_id)
       setLists(response.data)
+
+      const cardsByList = {}
+      for(const list of response.data) {
+        const cardResponse = await getListCards(list.id)
+        cardsByList[list.id] = cardResponse.data
+      }
+      setCards(cardsByList)
     } catch (error) {
       console.error('Error fetching board lists:', error)
     }
@@ -110,6 +121,36 @@ function BoardPage() {
     }
   }
 
+  const fetchCardsForList = async (listId) => {
+    try {
+      const response = await getListCards(listId)
+
+      setCards((prevCards) => ({
+        ...prevCards,
+        [listId]: response.data,
+      }))
+    } catch (error) {
+      console.error('Error fetching cards:', error)
+    }
+  }
+
+  const handleRenameCard = async (cardId, listId, name) => {
+    try {
+      await updateCard(cardId, name)
+      await fetchCardsForList(listId)
+    } catch (error) {
+      console.error('Error renaming card:', error)
+    }
+  }
+
+  const handleArchiveCard = async (cardId, listId) => {
+    try {
+      await updateCardClosed(cardId, true)
+      await fetchCardsForList(listId)
+    } catch (error) {
+      console.error('Error archiving card:', error)
+    }
+  }
   return (
     <main className="flex h-screen flex-col bg-gray-100">
 
@@ -142,8 +183,12 @@ function BoardPage() {
             <ListCard
               key={list.id}
               list={list}
+              cards={cards[list.id] || []}
               onArchive={handleArchiveList}
               onRename={handleRenameList}
+              onRefreshCards={fetchCardsForList}
+              onRenameCard={handleRenameCard}
+              onArchiveCard={handleArchiveCard}
             />
           ))}
 
