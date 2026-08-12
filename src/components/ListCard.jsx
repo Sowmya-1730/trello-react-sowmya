@@ -4,7 +4,7 @@ import { MoreOutlined } from '@ant-design/icons'
 import { createCard } from '../api/trelloApi'
 
 
-function ListCard({ list, cards, onArchive, onRename, onRefreshCards, onRenameCard, onArchiveCard }) {
+function ListCard({ list, cards, onArchive, onRename, onRefreshCards, onRenameCard, onArchiveCard, onCardClick }) {
   const [isEditing, setIsEditing] = useState(false)
   const [listName, setListName] = useState(list.name)
 
@@ -149,6 +149,7 @@ function ListCard({ list, cards, onArchive, onRename, onRefreshCards, onRenameCa
           return (
             <article
               key={card.id}
+              onClick={() => onCardClick(card, list)}
               className="group relative rounded-md bg-gray-200 p-3 shadow-sm "
             >
               {editingCardId === card.id ? (
