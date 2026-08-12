@@ -175,3 +175,58 @@ export const deleteChecklist = (checklistId) => {
     },
   })
 }
+
+
+export const getChecklistItems = (checklistId) => {
+  return trelloApi.get(`/checklists/${checklistId}/checkItems`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
+
+export const createChecklistItem = (checklistId, name) => {
+  return trelloApi.post(`/checklists/${checklistId}/checkItems`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+
+export const updateChecklistItemState = (cardId, checkItemId, state) => {
+  return trelloApi.put(`/cards/${cardId}/checkItem/${checkItemId}`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      state,
+    },
+  })
+}
+
+
+export const updateChecklistItem = (cardId, checkItemId, name) => {
+  return trelloApi.put(`/cards/${cardId}/checkItem/${checkItemId}`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+
+export const deleteChecklistItem = (cardId, checkItemId) => {
+  return trelloApi.delete(
+    `/cards/${cardId}/checkItem/${checkItemId}`,
+    {
+      params: {
+        key: import.meta.env.VITE_TRELLO_API_KEY,
+        token: import.meta.env.VITE_TRELLO_TOKEN,
+      },
+    }
+  )
+}
