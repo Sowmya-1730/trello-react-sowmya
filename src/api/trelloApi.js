@@ -13,6 +13,14 @@ export const getBoards = () => {
   })
 }
 
+export const getBoard = (boardId) => {
+  return trelloApi.get(`/boards/${boardId}`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
 
 export const createBoard = (name) => {
   return trelloApi.post('/boards', null, {
@@ -20,6 +28,16 @@ export const createBoard = (name) => {
       key: import.meta.env.VITE_TRELLO_API_KEY,
       token: import.meta.env.VITE_TRELLO_TOKEN,
       name,
+    },
+  })
+}
+
+
+export const getBoardLists = (boardId) => {
+  return trelloApi.get(`/boards/${boardId}/lists`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
     },
   })
 }
