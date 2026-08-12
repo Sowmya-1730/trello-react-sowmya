@@ -135,3 +135,43 @@ export const updateCardClosed = (cardId, closed) => {
     },
   })
 }
+
+
+
+export const getCardChecklists = (cardId) => {
+  return trelloApi.get(`/cards/${cardId}/checklists`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
+
+export const createChecklist = (cardId, name) => {
+  return trelloApi.post(`/cards/${cardId}/checklists`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+export const updateChecklist = (checklistId, name) => {
+  return trelloApi.put(`/checklists/${checklistId}`, null, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+      name,
+    },
+  })
+}
+
+export const deleteChecklist = (checklistId) => {
+  return trelloApi.delete(`/checklists/${checklistId}`, {
+    params: {
+      key: import.meta.env.VITE_TRELLO_API_KEY,
+      token: import.meta.env.VITE_TRELLO_TOKEN,
+    },
+  })
+}
