@@ -3,7 +3,7 @@ import BoardCard from '../components/BoardCard'
 import CreateBoardCard from '../components/CreateBoardCard'
 import CreateBoardModal from '../components/CreateBoardModal'
 
-import { getBoards } from '../api/trelloApi'
+import { deleteBoard, getBoards } from '../api/trelloApi'
 import { createBoard } from '../api/trelloApi'
 
 function BoardsPage() {
@@ -45,6 +45,16 @@ function BoardsPage() {
           setCreating(false)
       }
   }
+
+  const handleDeleteBoard = async (boardId) => {
+    try {
+      await deleteBoard(boardId)
+      const response = await getBoards()
+      setBoards(response.data)
+    } catch(error) {
+      console.error('Error deleting board: ',error)
+    }
+  }
     return (
         <main className="min-h-screen bg-gray-100 p-8">
       <h1 className="mb-6 text-3xl font-bold">
@@ -78,6 +88,7 @@ function BoardsPage() {
             <BoardCard
               key={board.id}
               board={board}
+              onDelete={handleDeleteBoard}
             />
           ))}
 
