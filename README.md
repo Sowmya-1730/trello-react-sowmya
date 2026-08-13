@@ -62,7 +62,6 @@ For example:
 ```text
 3 completed / 5 total = 60%
 ```
-
 The progress bar automatically updates when:
 
 - A check item is checked
@@ -73,17 +72,14 @@ The progress bar automatically updates when:
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| React | Frontend UI |
-| Vite | Development and build tool |
-| React Router | Client-side routing |
-| Ant Design | UI components |
-| Tailwind CSS | Styling |
-| Axios | HTTP/API requests |
-| Trello REST API | Backend data source |
-| JavaScript | Application logic |
-
+- React -> Frontend UI
+- Vite -> Development and build tool
+- React Router -> Client-side routing
+- Ant Design -> UI components
+- Tailwind CSS -> Styling
+- Axios -> HTTP/API requests
+- Trello REST API -> Backend data source
+- JavaScript -> Application logic
 
 ## Application Hierarchy
 
@@ -145,6 +141,10 @@ The Axios instance uses:
 ```javascript
 const trelloApi = axios.create({
   baseURL: 'https://api.trello.com/1',
+  params: {
+    key: API_KEY,
+    token: API_TOKEN,
+  },
 })
 ```
 
@@ -206,18 +206,6 @@ npm run dev
 ```
 
 Open the local URL displayed by Vite in your browser.
-
-### 5. Build for production
-
-```bash
-npm run build
-```
-
-### 6. Preview the production build
-
-```bash
-npm run preview
-```
 
 
 ## API Operations
@@ -387,146 +375,6 @@ Card
 ```
 
 
-## Checklist Operations
-
-### Create Checklist
-
-Click:
-
-```text
-+ Add a checklist
-```
-
-Enter a name and click **Add Checklist**.
-
-### Rename Checklist
-
-Double-click the checklist name.
-
-An input field appears. Edit the name and press **Enter** to save.
-
-### Delete Checklist
-
-Click the **Delete** button on the checklist.
-
-The checklist is deleted through the Trello API and removed from the UI.
-
-
-## Check Item Operations
-
-### Create Check Item
-
-Click:
-
-```text
-+ Add an item
-```
-
-Enter the item name and click **Add Item**.
-
-### Check / Uncheck
-
-Click the checkbox.
-
-The item's state changes between:
-
-```text
-incomplete
-complete
-```
-
-Completed items are displayed with a strikethrough:
-
-
-### Rename Check Item
-
-Double-click the check-item name.
-
-Edit the name and press **Enter** to save.
-
-### Delete Check Item
-
-Click the horizontal three-dot menu:
-
-Then select:
-
-```text
-Delete Item
-```
-
-The item is deleted from Trello and the UI is refreshed.
-
-## Checklist Progress
-
-Checklist progress is calculated from the number of completed check items.
-
-The calculation is:
-
-```text
-completed check items
---------------------- × 100
-total check items
-```
-
-For example:
-
-```text
-Completed items = 3
-Total items     = 5
-
-Progress = 3 / 5 × 100
-         = 60%
-```
-
-The checklist displays:
-
-- Percentage
-- Horizontal progress bar
-
-The progress is recalculated whenever the `checkItems` React state changes.
-
-
-## State Management
-
-The project uses React's `useState` and `useEffect` hooks for state management.
-
-Check items are stored by checklist ID:
-
-```javascript
-const [checkItems, setCheckItems] = useState({})
-```
-
-The structure is approximately:
-
-```javascript
-{
-  checklistId1: [
-    {
-      id: 'item1',
-      name: 'Create React project',
-      state: 'complete'
-    },
-    {
-      id: 'item2',
-      name: 'Connect API',
-      state: 'incomplete'
-    }
-  ],
-
-  checklistId2: [
-    {
-      id: 'item3',
-      name: 'Test application',
-      state: 'incomplete'
-    }
-  ]
-}
-```
-
-This structure allows each checklist's check items to be updated independently.
-
-
-
 ## API Layer
 
 API calls are separated from UI components.
@@ -543,8 +391,6 @@ For example:
 export const createChecklistItem = (checklistId, name) => {
   return trelloApi.post(`/checklists/${checklistId}/checkItems`, null, {
     params: {
-      key: import.meta.env.VITE_TRELLO_API_KEY,
-      token: import.meta.env.VITE_TRELLO_TOKEN,
       name,
     },
   })
