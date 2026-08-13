@@ -1,5 +1,3 @@
-import { Button } from 'antd'
-
 function CreateBoardCard({ onClick }) {
   return (
     <button
