@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Dropdown, Popconfirm } from "antd";
+import { Button, Dropdown} from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 
 function BoardCard({ board, onDelete }) {
