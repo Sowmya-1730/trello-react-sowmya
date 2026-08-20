@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
+import { message } from 'antd'
+
 import BoardCard from '../components/BoardCard'
 import CreateBoardCard from '../components/CreateBoardCard'
 import CreateBoardModal from '../components/CreateBoardModal'
 
-import { deleteBoard, getBoards } from '../api/trelloApi'
-import { createBoard } from '../api/trelloApi'
+import { deleteBoard, getBoards, createBoard } from '../api/trelloApi'
 
 function BoardsPage() {
   const [boards, setBoards] = useState([])
@@ -12,7 +13,12 @@ function BoardsPage() {
   const [error, setError] = useState('')
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [creating, setCreating] = useState(false)
+  const [creatingBoard, setCreatingBoard] = useState(false)
+
+
+  useEffect(() => {
+    document.title = 'Boards'
+  }, [])
 
 
   useEffect(() => {
@@ -21,8 +27,8 @@ function BoardsPage() {
               const response = await getBoards()
 
               setBoards(response.data)
-            } catch (error) {
-                console.error(error)
+            } catch {
+                message.error('Failed to load boards.')
                 setError('Failed to load boards.')
             } finally {
                 setLoading(false)
@@ -34,15 +40,15 @@ function BoardsPage() {
 
     const handleCreateBoard = async (name) => {
       try {
-          setCreating(true)
+          setCreatingBoard(true)
 
           const response = await createBoard(name)
           setBoards((prevBoards) => [...prevBoards, response.data])
           setIsCreateModalOpen(false)
-      } catch (error) {
-          console.error(error)
+      } catch {
+          message.error('Failed to create board.')
       } finally {
-          setCreating(false)
+          setCreatingBoard(false)
       }
   }
 
@@ -51,8 +57,8 @@ function BoardsPage() {
       await deleteBoard(boardId)
       const response = await getBoards()
       setBoards(response.data)
-    } catch(error) {
-      console.error('Error deleting board: ',error)
+    } catch {
+      message.error('Failed to delete board.')
     }
   }
     return (
@@ -102,7 +108,7 @@ function BoardsPage() {
       open={isCreateModalOpen}
       onCancel={() => setIsCreateModalOpen(false)}
       onCreate={handleCreateBoard}
-      loading={creating}
+      loading={creatingBoard}
     />
     </main>
   )
