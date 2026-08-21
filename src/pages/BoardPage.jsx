@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Input, Button, message } from 'antd'
+import { Helmet } from 'react-helmet-async'
 
 import CreateListModal from '../components/CreateListModal'
 import ListCard from '../components/ListCard'
@@ -96,20 +97,6 @@ function BoardPage() {
       ignore = true
     }
   }, [boardId])
-
-  useEffect(() => {
-    if (selectedCard) {
-      document.title = selectedCard.name
-      return
-    }
-
-    if (board) {
-      document.title = board.name
-      return
-    }
-
-    document.title = 'Trello'
-  }, [board, selectedCard])
 
   const handleCreateList = async (name) => {
     try {
@@ -210,6 +197,18 @@ function BoardPage() {
 
 
   return (
+
+    <>
+
+    <Helmet>
+      <title>
+        {selectedCard
+          ? selectedCard.name
+          : board
+            ? board.name
+            : 'Trello'}
+      </title>
+    </Helmet>
     <main className="flex h-screen flex-col bg-gray-100">
 
       {/* Board Header */}
@@ -282,6 +281,7 @@ function BoardPage() {
 
 
     </main>
+  </>
   )
 }
 

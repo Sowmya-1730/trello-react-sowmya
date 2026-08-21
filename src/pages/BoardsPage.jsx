@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { message } from 'antd'
+import { Helmet } from 'react-helmet-async'
 
 import BoardCard from '../components/BoardCard'
 import CreateBoardCard from '../components/CreateBoardCard'
@@ -14,12 +15,6 @@ function BoardsPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [creatingBoard, setCreatingBoard] = useState(false)
-
-
-  useEffect(() => {
-    document.title = 'Boards'
-  }, [])
-
 
   useEffect(() => {
       const fetchBoards = async () => {
@@ -62,6 +57,10 @@ function BoardsPage() {
     }
   }
     return (
+      <>
+        <Helmet>
+          <title>Boards</title>
+        </Helmet>
         <main className="min-h-screen bg-gray-100 p-8">
       <h1 className="mb-6 text-3xl font-bold">
         Boards
@@ -111,6 +110,7 @@ function BoardsPage() {
       loading={creatingBoard}
     />
     </main>
+  </>
   )
 }
 
