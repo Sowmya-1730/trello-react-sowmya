@@ -5,7 +5,7 @@ function CreateBoardCard({ onClick }) {
     <Button
       type="default"
       onClick={onClick}
-      className="mt-5 flex h-50 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-80 p-4 shadow-md transition-shadow duration-200 hover:shadow-lg"
+      className="mt-5! h-50! w-full! rounded-lg! border-2! border-dashed! border-gray-300! bg-gray-80! p-4! shadow-md!"
     >
       <span className="text-lg font-semibold">
         Create new board
