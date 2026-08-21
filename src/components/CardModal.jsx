@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Modal, Button, Input, Dropdown } from 'antd'
+import { Modal, Button, Input, Dropdown, message } from 'antd'
 import { MoreOutlined } from '@ant-design/icons'
+
 import {
     getCardChecklists,
     createChecklist,
@@ -43,19 +44,35 @@ function CardModal({ open, onCancel, card, list }) {
         const response = await getCardChecklists(card.id)
         setChecklists(response.data)
 
+        const itemResponses = await Promise.all(
+          response.data.map((checklist) =>
+            getChecklistItems(checklist.id)
+          )
+        )
+
         const itemsByChecklist = {}
-        for(const checklist of response.data) {
-            const itemResponse = await getChecklistItems(checklist.id)
-            itemsByChecklist[checklist.id] = itemResponse.data
-        }
+
+        response.data.forEach((checklist, index) => {
+          itemsByChecklist[checklist.id] = itemResponses[index].data
+        })
+
         setCheckItems(itemsByChecklist)
-      } catch (error) {
-        console.error('Error fetching checklists:', error)
+      } catch {
+        message.error('Failed to load checklists.')
       }
     }
 
     fetchChecklists()
   }, [open, card])
+
+  const refreshChecklistItems = async (checklistId) => {
+  const response = await getChecklistItems(checklistId)
+
+  setCheckItems((previousItems) => ({
+      ...previousItems,
+      [checklistId]: response.data,
+    }))
+  }
 
 
   const handleCreateChecklist = async () => {
@@ -71,8 +88,8 @@ function CardModal({ open, onCancel, card, list }) {
         setChecklists(response.data)
         setChecklistName('')
         setIsAddingChecklist(false)
-    } catch (error) {
-        console.error('Error creating checklist:', error)
+    } catch {
+        message.error('Failed to create checklist.')
     } finally {
         setCreatingChecklist(false)
     }
@@ -96,8 +113,8 @@ function CardModal({ open, onCancel, card, list }) {
 
         setEditingChecklistId(null)
         setEditingChecklistName('')
-    } catch (error) {
-        console.error('Error renaming checklist:', error)
+    } catch {
+        message.error('Failed to rename checklist.')
     }
     }
 
@@ -112,8 +129,8 @@ function CardModal({ open, onCancel, card, list }) {
         await deleteChecklist(checklist.id)
         const response = await getCardChecklists(card.id)
         setChecklists(response.data)
-    } catch (error) {
-        console.error('Error deleting checklist:', error)
+    } catch {
+        message.error('Failed to delete checklist.')
     }
     }
 
@@ -126,16 +143,11 @@ function CardModal({ open, onCancel, card, list }) {
     try {
         setCreatingCheckItem(true)
         await createChecklistItem(checklistId, name)
-
-        const response = await getChecklistItems(checklistId)
-        setCheckItems((previousItems) => ({
-        ...previousItems,
-        [checklistId]: response.data
-        }))
+        await refreshChecklistItems(checklistId)
         setCheckItemName('')
         setAddingCheckItemId(null)
-    } catch (error) {
-        console.error('Error creating check item:', error)
+    } catch {
+        message.error('Failed to create check item.')
     } finally {
         setCreatingCheckItem(false)
     }
@@ -145,14 +157,10 @@ function CardModal({ open, onCancel, card, list }) {
         const newState =
             item.state === 'complete' ? 'incomplete' : 'complete'
         try {
-            await updateChecklistItemState(card.id,item.id,newState)
-            const response = await getChecklistItems(item.idChecklist)
-            setCheckItems((previousItems) => ({
-            ...previousItems,
-            [item.idChecklist]: response.data
-            }))
-        } catch (error) {
-            console.error('Error updating check item:', error)
+            await updateChecklistItemState(card.id, item.id, newState)
+            await refreshChecklistItems(item.idChecklist)
+        } catch {
+            message.error('Failed to update check item.')
         }
         }
 
@@ -168,16 +176,12 @@ function CardModal({ open, onCancel, card, list }) {
         }
 
         try {
-            await updateChecklistItem(card.id,item.id,newName)
-            const response = await getChecklistItems(item.idChecklist)
-            setCheckItems((previousItems) => ({
-            ...previousItems,
-            [item.idChecklist]: response.data
-            }))
+            await updateChecklistItem(card.id, item.id, newName)
+            await refreshChecklistItems(item.idChecklist)
             setEditingCheckItemId(null)
             setEditingCheckItemName('')
-        } catch (error) {
-            console.error('Error renaming check item:', error)
+        } catch {
+            message.error('Failed to rename check item.')
         }
     }
 
@@ -190,13 +194,9 @@ function CardModal({ open, onCancel, card, list }) {
     const handleDeleteCheckItem = async (item) => {
         try {
             await deleteChecklistItem(card.id, item.id)
-            const response = await getChecklistItems(item.idChecklist)
-            setCheckItems((previousItems) => ({
-            ...previousItems,
-            [item.idChecklist]: response.data
-            }))
-        } catch (error) {
-            console.error('Error deleting check item:', error)
+            await refreshChecklistItems(item.idChecklist)
+        } catch {
+            message.error('Failed to delete check item.')
         }
     }
 

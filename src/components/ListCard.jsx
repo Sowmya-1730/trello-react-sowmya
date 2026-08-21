@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Button, Dropdown, Input } from 'antd'
+import { Button, Dropdown, Input, message } from 'antd'
 import { MoreOutlined } from '@ant-design/icons'
+
 import { createCard } from '../api/trelloApi'
 
 
@@ -60,8 +61,8 @@ function ListCard({ list, cards, onArchive, onRename, onRefreshCards, onRenameCa
       setIsAddingCard(false)
 
       await onRefreshCards(list.id)
-    } catch (error) {
-      console.error('Error creating card:', error)
+    } catch {
+      message.error('Failed to create card.')
     } finally {
       setCreatingCard(false)
     }
@@ -97,11 +98,10 @@ function ListCard({ list, cards, onArchive, onRename, onRefreshCards, onRenameCa
     <article className="relative w-72 shrink-0 rounded-lg bg-white p-4 shadow-md">
       <div className="flex items-center justify-between">
         {isEditing ? (
-          <input
-            type="text"
+          <Input
             value={listName}
             onChange={(event) => setListName(event.target.value)}
-            onKeyDown={handleRename}
+            onPressEnter={handleRename}
             autoFocus
             className="w-full rounded-md border border-gray-300 px-2 py-1 font-semibold outline-none"
           />

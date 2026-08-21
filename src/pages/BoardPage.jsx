@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
+import { Input, Button, message } from 'antd'
+import { Helmet } from 'react-helmet-async'
 
 import CreateListModal from '../components/CreateListModal'
 import ListCard from '../components/ListCard'
@@ -18,89 +20,121 @@ import {
 } from '../api/trelloApi'
 
 function BoardPage() {
-  const { board_id } = useParams()
+  const { boardId } = useParams()
 
   const [board, setBoard] = useState(null)
   const [lists, setLists] = useState([])
   const [cards, setCards] = useState([])
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [creating, setCreating] = useState(false)
+  const [creatingList, setCreatingList] = useState(false)
 
   const [isEditingBoardName, setIsEditingBoardName] = useState(false)
-  const [boardName, setBoardName] = useState('');
+  const [boardName, setBoardName] = useState('')
 
   const [selectedCard, setSelectedCard] = useState(null)
   const [selectedList, setSelectedList] = useState(null)
 
-  const fetchBoard = async () => {
-    try {
-      const response = await getBoard(board_id)
-      setBoard(response.data)
-      setBoardName(response.data.name)
-    } catch (error) {
-      console.error('Error fetching board:', error)
-    }
-  }
 
-  const fetchBoardLists = async () => {
+  const fetchBoardLists = useCallback(async () => {
     try {
-      const response = await getBoardLists(board_id)
+      const response = await getBoardLists(boardId)
       setLists(response.data)
 
-      const cardsByList = {}
-      for(const list of response.data) {
-        const cardResponse = await getListCards(list.id)
-        cardsByList[list.id] = cardResponse.data
-      }
+    const cardResponses = await Promise.all(
+      response.data.map((list) => getListCards(list.id))
+    )
+
+    const cardsByList = {}
+
+    response.data.forEach((list, index) => {
+      cardsByList[list.id] = cardResponses[index].data
+    })
+
+    setCards(cardsByList)
+
       setCards(cardsByList)
-    } catch (error) {
-      console.error('Error fetching board lists:', error)
+    } catch {
+      message.error('Failed to load board lists.')
     }
-  }
+  }, [boardId])
 
   useEffect(() => {
-    fetchBoard()
-    fetchBoardLists()
-  }, [board_id])
+    let ignore = false
+
+    const fetchBoardData = async () => {
+      try {
+        const [boardResponse, listsResponse] = await Promise.all([
+          getBoard(boardId),
+          getBoardLists(boardId),
+        ])
+
+        const cardsByList = {}
+
+        for (const list of listsResponse.data) {
+          const cardResponse = await getListCards(list.id)
+          cardsByList[list.id] = cardResponse.data
+        }
+
+        if (ignore) {
+          return
+        }
+
+        setBoard(boardResponse.data)
+        setBoardName(boardResponse.data.name)
+        setLists(listsResponse.data)
+        setCards(cardsByList)
+      } catch {
+        if (!ignore) {
+          message.error('Failed to load board.')
+        }
+      }
+    }
+
+    fetchBoardData()
+
+    return () => {
+      ignore = true
+    }
+  }, [boardId])
 
   const handleCreateList = async (name) => {
     try {
-      setCreating(true)
+      setCreatingList(true)
 
-      await createList(name, board_id)
+      await createList(name, boardId)
 
       await fetchBoardLists()
 
       setIsCreateModalOpen(false)
-    } catch (error) {
-      console.error('Error creating list:', error)
+    } catch {
+      message.error('Failed to create list.')
     } finally {
-      setCreating(false)
+      setCreatingList(false)
     }
   }
 
   const handleRenameBoard = async (event) => {
-    if(event.key !== 'Enter') {
+    if (event.key !== 'Enter') {
       return
     }
 
     const newName = boardName.trim();
-    if(!newName || newName === board.name) {
+    if (!newName || newName === board.name) {
       setBoardName(board.name)
       setIsEditingBoardName(false)
       return
     }
 
     try {
-      await updateBoard(board_id, newName)
+      await updateBoard(boardId, newName)
       setBoard((prevBoard) => ({
         ...prevBoard,
         name: newName
       }))
       setIsEditingBoardName(false)
-    } catch(error) {
-      console.error('Error renaming board: ',error)
+    } catch {
+      message.error('Failed to rename board.')
     }
 
   }
@@ -111,8 +145,8 @@ function BoardPage() {
       await updateList(listId, name)
 
       await fetchBoardLists()
-    } catch (error) {
-      console.error('Error renaming list:', error)
+    } catch  {
+      message.error('Failed to rename list.')
     }
   }
 
@@ -120,8 +154,8 @@ function BoardPage() {
     try {
       await updateListClosed(listId, true)
       await fetchBoardLists()
-    } catch(error) {
-      console.error('Error archiving list: ',error)
+    } catch {
+      message.error('Failed to archive list.')
     }
   }
 
@@ -133,8 +167,8 @@ function BoardPage() {
         ...prevCards,
         [listId]: response.data,
       }))
-    } catch (error) {
-      console.error('Error fetching cards:', error)
+    } catch {
+      message.error('Failed to load cards.')
     }
   }
 
@@ -142,8 +176,8 @@ function BoardPage() {
     try {
       await updateCard(cardId, name)
       await fetchCardsForList(listId)
-    } catch (error) {
-      console.error('Error renaming card:', error)
+    } catch {
+      message.error('Failed to rename card.')
     }
   }
 
@@ -151,8 +185,8 @@ function BoardPage() {
     try {
       await updateCardClosed(cardId, true)
       await fetchCardsForList(listId)
-    } catch (error) {
-      console.error('Error archiving card:', error)
+    } catch {
+      message.error('Failed to archive card.')
     }
   }
 
@@ -163,16 +197,27 @@ function BoardPage() {
 
 
   return (
+
+    <>
+
+    <Helmet>
+      <title>
+        {selectedCard
+          ? selectedCard.name
+          : board
+            ? board.name
+            : 'Trello'}
+      </title>
+    </Helmet>
     <main className="flex h-screen flex-col bg-gray-100">
 
       {/* Board Header */}
       <header className="shrink-0 px-8 py-5">
         {isEditingBoardName ? (
-          <input
-            type="text"
+          <Input
             value={boardName}
             onChange={(event) => setBoardName(event.target.value)}
-            onKeyDown={handleRenameBoard}
+            onPressEnter={handleRenameBoard}
             autoFocus
             className="w-full max-w-xl rounded-md border border-gray-300 bg-white px-2 py-1 text-3xl font-bold outline-none"
           />
@@ -205,13 +250,13 @@ function BoardPage() {
           ))}
 
           {/* Create List Card */}
-          <button
-            type="button"
+          <Button
+            type="default"
             onClick={() => setIsCreateModalOpen(true)}
-            className="w-72 shrink-0 rounded-lg bg-white p-4 text-left font-semibold cursor-pointer shadow-md transition hover:bg-gray-50"
+            className="w-72 shrink-0 text-left font-semibold shadow-md transition hover:bg-gray-50"
           >
             + Add another list
-          </button>
+          </Button>
 
         </div>
       </div>
@@ -221,7 +266,7 @@ function BoardPage() {
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
         onCreate={handleCreateList}
-        loading={creating}
+        loading={creatingList}
       />
 
       <CardModal
@@ -236,6 +281,7 @@ function BoardPage() {
 
 
     </main>
+  </>
   )
 }
 

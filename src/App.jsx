@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/boards" element={<BoardsPage />} />
-        <Route path="/boards/:board_id" element={<BoardPage />} />
+        <Route path="/boards/:boardId" element={<BoardPage />} />
 
         <Route path="*" element={<Navigate to="/boards" replace/>} />
       </Routes>

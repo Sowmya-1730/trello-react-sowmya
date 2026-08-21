@@ -1,12 +1,11 @@
 import axios from 'axios'
-const API_KEY = import.meta.env.VITE_TRELLO_API_KEY
-const API_TOKEN = import.meta.env.VITE_TRELLO_TOKEN
+import config from '../config/config'
 
 const trelloApi = axios.create({
-  baseURL: 'https://api.trello.com/1',
+  baseURL: config.trello.apiUrl,
   params: {
-    key: API_KEY,
-    token: API_TOKEN
+    key: config.trello.apiKey,
+    token: config.trello.token
   },
 })
 
@@ -55,7 +54,7 @@ export const createList = (name, boardId) => {
 
 
 export const updateList = (listId, name) => {
-  return trelloApi.put(`/lists/${listId}`,null, {
+  return trelloApi.put(`/lists/${listId}`, null, {
     params: {
       name,
     },
